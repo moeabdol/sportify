@@ -137,15 +137,16 @@ describe("SpotifyService", () => {
       }));
     });
 
-    spyOnProperty(spotifyService, "accessToken", "get")
-      .and.returnValue("12345");
+    spyOn(spotifyService, "authorize").and.callThrough();
+
+    spotifyService.accessToken = "12345";
+    spotifyService.accessTokenDateTime = new Date;
     spotifyService.searchTrack("u2").subscribe(res =>  response = res);
 
-    expect(response.tracks.items.length)
-      .toEqual(1);
+    expect(spotifyService.authorize).not.toHaveBeenCalled();
+    expect(response.tracks.items.length).toEqual(1);
     expect(response.tracks.items[0].album.artists[0].name)
       .toBe("Kendrick Lamar");
-    expect(response.tracks.items[0].album.name)
-      .toBe("DAMN.");
+    expect(response.tracks.items[0].album.name).toBe("DAMN.");
   });
 });

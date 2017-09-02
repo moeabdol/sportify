@@ -18,6 +18,10 @@ export class SpotifyService {
     return this._accessToken;
   }
 
+  set accessToken(accessToken: string) {
+    this._accessToken = accessToken;
+  }
+
   get accessTokenDateTime() {
     return this._accessTokenDateTime;
   }
@@ -56,10 +60,10 @@ export class SpotifyService {
   }
 
   searchTrack(query: string) {
-    const token = this.accessToken;
+    this.refreshAccessToken();
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
-    headers.append("Authorization", `Bearer ${token}`);
+    headers.append("Authorization", `Bearer ${this._accessToken}`);
     const params: string = [
       `q=${query}`,
       `type=track`,
