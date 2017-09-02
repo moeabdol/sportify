@@ -9,35 +9,19 @@ import { environment } from "../../environments/environment";
 export class SpotifyService {
   private _SPOTIFY_CLIENT_ID: string = environment.SPOTIFY_CLIENT_ID;
   private _SPOTIFY_CLIENT_SECRET: string = environment.SPOTIFY_CLIENT_SECRET;
-  private _accessToken: string;
-  private _accessTokenDateTime: Date;
+  public accessToken: string;
+  public accessTokenDateTime: Date;
 
   constructor(private _http: Http) { }
 
-  get accessToken() {
-    return this._accessToken;
-  }
-
-  set accessToken(accessToken: string) {
-    this._accessToken = accessToken;
-  }
-
-  get accessTokenDateTime() {
-    return this._accessTokenDateTime;
-  }
-
-  set accessTokenDateTime(dateTime: Date) {
-    this._accessTokenDateTime = dateTime;
-  }
-
   refreshAccessToken() {
     const seconds =
-      this.deltaTimeInSeconds(new Date, this._accessTokenDateTime);
+      this.deltaTimeInSeconds(new Date, this.accessTokenDateTime);
     if (seconds >= 3600) {
       this.authorize().subscribe(
         res => {
-          this._accessToken = res.json().access_token;
-          this._accessTokenDateTime = new Date;
+          this.accessToken = res.json().access_token;
+          this.accessTokenDateTime = new Date;
         },
         err => console.log(err)
       );
@@ -63,7 +47,7 @@ export class SpotifyService {
     this.refreshAccessToken();
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
-    headers.append("Authorization", `Bearer ${this._accessToken}`);
+    headers.append("Authorization", `Bearer ${this.accessToken}`);
     const params: string = [
       `q=${query}`,
       `type=track`,
