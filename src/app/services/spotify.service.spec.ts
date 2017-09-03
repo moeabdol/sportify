@@ -1,9 +1,9 @@
-import { TestBed, inject, fakeAsync, tick } from "@angular/core/testing";
+import { TestBed, inject, async } from "@angular/core/testing";
 import { MockBackend } from "@angular/http/testing";
 import { Observable } from "rxjs/Rx";
 import {
-  Http,
-  BaseRequestOptions,
+  HttpModule,
+  XHRBackend,
   Response,
   ResponseOptions
 } from "@angular/http";
@@ -16,23 +16,15 @@ describe("SpotifyService", () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [HttpModule],
       providers: [
         SpotifyService,
-        MockBackend,
-        BaseRequestOptions,
-        {
-          provide: Http,
-          useFactory: (backend, options) => new Http(backend, options),
-          deps: [
-            MockBackend,
-            BaseRequestOptions
-          ]
-        }
+        { provide: XHRBackend, useClass: MockBackend }
       ]
     });
 
     spotifyService = TestBed.get(SpotifyService);
-    spotifyBackend = TestBed.get(MockBackend);
+    spotifyBackend = TestBed.get(XHRBackend);
   });
 
   it("should be created", inject([SpotifyService],
@@ -61,7 +53,7 @@ describe("SpotifyService", () => {
     expect(spotifyService.authorize).not.toHaveBeenCalled();
   });
 
-  it("should be able to authorize", () => {
+  it("should be able to authorize", async(() => {
     let request;
     let requestBody;
     let response;
@@ -98,9 +90,9 @@ describe("SpotifyService", () => {
     expect(response.access_token).toBe("12345");
     expect(response.token_type).toBe("bearer");
     expect(response.expires_in).toBe(3600);
-  });
+  }));
 
-  it("should be able to search tracks", () => {
+  it("should be able to search tracks", async(() => {
     let request;
     let requestBody;
     let response;
@@ -144,5 +136,5 @@ describe("SpotifyService", () => {
     expect(response.tracks.items[0].album.artists[0].name)
       .toBe("Kendrick Lamar");
     expect(response.tracks.items[0].album.name).toBe("DAMN.");
-  });
+  }));
 });
