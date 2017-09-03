@@ -3,7 +3,7 @@ import { NgModule } from "@angular/core";
 
 import { AppComponent } from "./app.component";
 
-import { SpotifyService } from "./services/spotify.service";
+import { SpotifyService } from "./services/spotify/spotify.service";
 
 @NgModule({
   declarations: [
