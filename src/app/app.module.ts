@@ -1,9 +1,10 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
-
-import { AppComponent } from "./app.component";
+import { RouterModule } from "@angular/router";
 
 import { SpotifyService } from "./services/spotify/spotify.service";
+
+import { AppComponent } from "./app.component";
 import { SearchComponent } from "./components/search/search.component";
 
 @NgModule({
@@ -12,7 +13,8 @@ import { SearchComponent } from "./components/search/search.component";
     SearchComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    RouterModule
   ],
   providers: [SpotifyService],
   bootstrap: [AppComponent]
