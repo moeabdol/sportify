@@ -1,5 +1,6 @@
 import { TestBed, inject, fakeAsync, tick } from "@angular/core/testing";
 import { MockBackend } from "@angular/http/testing";
+import { Observable } from "rxjs/Rx";
 import {
   Http,
   BaseRequestOptions,
@@ -48,14 +49,14 @@ describe("SpotifyService", () => {
 
   it("should refresh access token if past 3600 seconds", () => {
     spotifyService.accessTokenDateTime = new Date("9/1/2017");
-    spyOn(spotifyService, "authorize").and.callThrough();
+    spyOn(spotifyService, "authorize").and.returnValue(Observable.of());
     spotifyService.refreshAccessToken();
     expect(spotifyService.authorize).toHaveBeenCalled();
   });
 
   it("should not refresh access token if not past 3600 seconds", () => {
     spotifyService.accessTokenDateTime = new Date;
-    spyOn(spotifyService, "authorize").and.callThrough();
+    spyOn(spotifyService, "authorize");
     spotifyService.refreshAccessToken();
     expect(spotifyService.authorize).not.toHaveBeenCalled();
   });
@@ -111,10 +112,8 @@ describe("SpotifyService", () => {
       expect(spotifyService.accessToken).toBe("12345");
       expect(request.url)
         .toMatch(/api.spotify.com\/v1\/search\?q\=u2\&type\=track/);
-      expect(request.headers.get("Content-Type"))
-        .toBe("application/json");
-      expect(request.headers.get("Authorization"))
-        .toBe("Bearer 12345");
+      expect(request.headers.get("Content-Type")).toBe("application/json");
+      expect(request.headers.get("Authorization")).toBe("Bearer 12345");
 
       connection.mockRespond(new Response(<ResponseOptions> {
         body: JSON.stringify({
@@ -137,13 +136,10 @@ describe("SpotifyService", () => {
       }));
     });
 
-    spyOn(spotifyService, "authorize").and.callThrough();
-
     spotifyService.accessToken = "12345";
     spotifyService.accessTokenDateTime = new Date;
     spotifyService.searchTrack("u2").subscribe(res =>  response = res);
 
-    expect(spotifyService.authorize).not.toHaveBeenCalled();
     expect(response.tracks.items.length).toEqual(1);
     expect(response.tracks.items[0].album.artists[0].name)
       .toBe("Kendrick Lamar");
