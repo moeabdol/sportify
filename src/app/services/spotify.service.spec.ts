@@ -11,8 +11,8 @@ import {
 import { SpotifyService } from "./spotify.service";
 
 describe("SpotifyService", () => {
-  let spotifyService: SpotifyService;
-  let spotifyBackend: MockBackend;
+  let service: SpotifyService;
+  let backend: MockBackend;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -23,34 +23,32 @@ describe("SpotifyService", () => {
       ]
     });
 
-    spotifyService = TestBed.get(SpotifyService);
-    spotifyBackend = TestBed.get(XHRBackend);
+    service = TestBed.get(SpotifyService);
+    backend = TestBed.get(XHRBackend);
   });
 
-  it("should be created", inject([SpotifyService],
-    (service: SpotifyService) => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
-  }));
+  });
 
   it("should calculate delta time in seconds between two dates", () => {
     const today = new Date("9/2/2017");
     const yesterday = new Date("9/1/2017");
-    expect(spotifyService.deltaTimeInSeconds(today, yesterday))
-      .toBe(24 * 60 * 60);
+    expect(service.deltaTimeInSeconds(today, yesterday)).toBe(24 * 60 * 60);
   });
 
   it("should refresh access token if past 3600 seconds", () => {
-    spotifyService.accessTokenDateTime = new Date("9/1/2017");
-    spyOn(spotifyService, "authorize").and.returnValue(Observable.of());
-    spotifyService.refreshAccessToken();
-    expect(spotifyService.authorize).toHaveBeenCalled();
+    service.accessTokenDateTime = new Date("9/1/2017");
+    spyOn(service, "authorize").and.returnValue(Observable.of());
+    service.refreshAccessToken();
+    expect(service.authorize).toHaveBeenCalled();
   });
 
   it("should not refresh access token if not past 3600 seconds", () => {
-    spotifyService.accessTokenDateTime = new Date;
-    spyOn(spotifyService, "authorize");
-    spotifyService.refreshAccessToken();
-    expect(spotifyService.authorize).not.toHaveBeenCalled();
+    service.accessTokenDateTime = new Date;
+    spyOn(service, "authorize");
+    service.refreshAccessToken();
+    expect(service.authorize).not.toHaveBeenCalled();
   });
 
   it("should be able to authorize", async(() => {
@@ -58,20 +56,16 @@ describe("SpotifyService", () => {
     let requestBody;
     let response;
 
-    spotifyBackend.connections.subscribe(connection => {
+    backend.connections.subscribe(connection => {
       request = connection.request;
       requestBody = connection.request.json();
 
-      expect(request.url)
-        .toBe("https://accounts.spotify.com/api/token");
+      expect(request.url).toBe("https://accounts.spotify.com/api/token");
       expect(request.headers.get("Content-Type"))
         .toBe("application/x-www-form-urlencoded");
-      expect(request.headers.get("Authorization"))
-        .toMatch(/Basic ZjIyYTNlYT/);
-      expect(requestBody.grant_type)
-        .not.toBeNull();
-      expect(requestBody.grant_type)
-        .toBe("client_credentials");
+      expect(request.headers.get("Authorization")).toMatch(/Basic ZjIyYTNlYT/);
+      expect(requestBody.grant_type).not.toBeNull();
+      expect(requestBody.grant_type).toBe("client_credentials");
 
       connection.mockRespond(new Response(<ResponseOptions> {
         body: JSON.stringify({
@@ -82,7 +76,7 @@ describe("SpotifyService", () => {
       }));
     });
 
-    spotifyService.authorize()
+    service.authorize()
       .subscribe(res => {
         response = res.json();
       });
@@ -97,11 +91,11 @@ describe("SpotifyService", () => {
     let requestBody;
     let response;
 
-    spotifyBackend.connections.subscribe(connection => {
+    backend.connections.subscribe(connection => {
       request = connection.request;
       requestBody = connection.request.json();
 
-      expect(spotifyService.accessToken).toBe("12345");
+      expect(service.accessToken).toBe("12345");
       expect(request.url)
         .toMatch(/api.spotify.com\/v1\/search\?q\=u2\&type\=track/);
       expect(request.headers.get("Content-Type")).toBe("application/json");
@@ -128,9 +122,9 @@ describe("SpotifyService", () => {
       }));
     });
 
-    spotifyService.accessToken = "12345";
-    spotifyService.accessTokenDateTime = new Date;
-    spotifyService.searchTrack("u2").subscribe(res =>  response = res);
+    service.accessToken = "12345";
+    service.accessTokenDateTime = new Date;
+    service.searchTrack("u2").subscribe(res =>  response = res);
 
     expect(response.tracks.items.length).toEqual(1);
     expect(response.tracks.items[0].album.artists[0].name)
